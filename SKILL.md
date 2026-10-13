@@ -61,7 +61,7 @@ Non procedere con il workflow finché tutti e quattro gli input obbligatori non 
 - Lingua del sito; default: italiano.
 - Credenziali SMTP se diverse da quelle di default dell'hosting.
 - Server di destinazione, se noto: Apache, LiteSpeed o Nginx.
-- Scelta anti-bot: reCAPTCHA v3, Cloudflare Turnstile o solo honeypot.
+- Scelta anti-bot: Google reCAPTCHA v3, Cloudflare Turnstile o solo honeypot (default se non indicato), con relative site key e secret key. Se la scelta è reCAPTCHA o Turnstile ma le chiavi mancano, lascia i campi vuoti in `config.php` e segnalalo nella consegna.
 - Script extra da inserire in `<head>` come GA4, GTM o Meta Pixel.
 
 Non inventare valori sensibili, recapiti, chiavi API, domini, email o testi legali mancanti.
@@ -289,7 +289,9 @@ return [
         'provider'   => 'none', // 'recaptcha' | 'turnstile' | 'none'
         'site_key'   => '',
         'secret_key' => '',
-        'min_score'  => 0.5,
+        'min_score'  => 0.5,        // solo reCAPTCHA v3
+        'action'     => 'contact',  // deve coincidere tra frontend e verifica server
+        'theme'      => 'auto',     // solo Turnstile: 'auto' | 'light' | 'dark'
     ],
     'header_scripts' => [
         // '<script>...</script>',

@@ -160,10 +160,72 @@ Controlla almeno:
 
 In locale il redirect HTTPS può non essere attivo ed è normale. Il certificato SSL e il redirect definitivo devono essere verificati dopo la pubblicazione sul server reale.
 
-## 6. Pubblicazione sul server
+## 6. Protezione anti-bot del form
+
+Il form di contatto ha sempre un **honeypot** (campo nascosto che i bot compilano). In aggiunta puoi scegliere un servizio anti-bot indicandolo nel prompt:
+
+| Opzione | Servizio | Come funziona | Quando sceglierla |
+|---------|----------|---------------|-------------------|
+| `recaptcha` | Google reCAPTCHA v3 | Invisibile, assegna un punteggio da 0.0 (bot) a 1.0 (umano) | Se il cliente usa già servizi Google |
+| `turnstile` | Cloudflare Turnstile | Widget leggero, nessun puzzle per l'utente | Alternativa più rispettosa della privacy, gratuita |
+| `none` | Solo honeypot | Nessuno script di terze parti | Default, se non scegli nulla |
+
+Esempio di prompt:
+
+```text
+$singlepage-site-generator
+
+...
+- Anti-bot: Cloudflare Turnstile
+```
+
+### Ottenere le chiavi
+
+- **reCAPTCHA v3:** dalla [console reCAPTCHA](https://www.google.com/recaptcha/admin) crea un sito di tipo *reCAPTCHA v3* e aggiungi i domini (anche `localhost` o `nome-sito.test` per i test).
+- **Turnstile:** dalla dashboard Cloudflare, sezione *Turnstile*, aggiungi un sito con il dominio. Non serve che il dominio usi Cloudflare come DNS.
+
+Ottieni sempre due chiavi: la **site key** (pubblica, usata nella pagina) e la **secret key** (privata, solo server).
+
+### Configurazione in `config/config.php`
+
+```php
+'anti_bot' => [
+    'provider'   => 'turnstile',   // 'recaptcha' | 'turnstile' | 'none'
+    'site_key'   => 'LA_TUA_SITE_KEY',
+    'secret_key' => 'LA_TUA_SECRET_KEY',
+    'min_score'  => 0.5,           // solo reCAPTCHA v3
+    'action'     => 'contact',     // nome azione, uguale tra frontend e server
+    'theme'      => 'auto',        // solo Turnstile: auto | light | dark
+],
+```
+
+| Chiave | Descrizione |
+|--------|-------------|
+| `provider` | Servizio attivo. Per cambiarlo basta modificare questo valore: viene caricato solo lo script del provider scelto. |
+| `site_key` | Chiave pubblica, inserita nella pagina. |
+| `secret_key` | Chiave privata, usata solo da `form-handler.php`. Non va mai pubblicata. |
+| `min_score` | Soglia reCAPTCHA v3. Sotto questo punteggio l'invio è rifiutato. 0.5 è un buon punto di partenza; alzala se arriva ancora spam. |
+| `action` | Etichetta dell'azione, controllata anche in verifica. |
+| `theme` | Aspetto del widget Turnstile. |
+
+### Comportamento
+
+- Il token è verificato **lato server** prima dell'invio dell'email; il controllo nel browser da solo non basta.
+- Se le chiavi mancano o il servizio non risponde, il form **rifiuta l'invio** (nessuna email parte) e mostra un errore generico.
+- Il token viene rigenerato a ogni tentativo di invio.
+
+### Test in locale
+
+Per Turnstile puoi usare le chiavi di test Cloudflare: site key `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA` (passa sempre). Per reCAPTCHA servono chiavi reali con `localhost` o il dominio `.test` tra i domini consentiti. **Sostituisci le chiavi di test con quelle reali prima della pubblicazione.**
+
+### Privacy
+
+Entrambi i servizi sono di terze parti: aggiorna Privacy Policy e Cookie Policy indicando quello scelto. Con reCAPTCHA il badge Google deve restare visibile oppure va aggiunto il testo di attribuzione richiesto da Google vicino al form. I testi legali non sono generati dalla skill.
+
+## 7. Pubblicazione sul server
 
 1. Carica tutti i file generati, incluso `.htaccess` se il server usa Apache o LiteSpeed.
-2. Configura dominio, email, SMTP ed eventuali chiavi anti-bot in `config/config.php`.
+2. Configura dominio, email, SMTP ed eventuali chiavi anti-bot (vedi sezione 6) in `config/config.php`.
 3. Installa o attiva il certificato SSL dal pannello hosting.
 4. Verifica il passaggio da HTTP a HTTPS senza loop.
 5. Controlla che canonical, Open Graph e Twitter usino URL HTTPS assoluti.

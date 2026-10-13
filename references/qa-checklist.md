@@ -84,6 +84,11 @@ Verifica soprattutto:
 - Privacy obbligatoria.
 - Honeypot presente.
 - Anti-bot aggiuntivo attivo solo se configurato.
+- Con `provider = none` nessuno script di terze parti anti-bot è caricato.
+- Con `recaptcha` o `turnstile` viene caricato solo lo script del provider scelto e la `secret_key` non compare in HTML, JS o risposte JSON.
+- Il token viene verificato lato server (e score/action/hostname controllati) prima dell'invio email; con chiavi mancanti o verifica fallita la richiesta è rifiutata.
+- Il token viene rigenerato (reCAPTCHA) o il widget resettato (Turnstile) dopo ogni tentativo di invio.
+- Se l'anti-bot è attivo, la consegna segnala di aggiornare privacy/cookie policy e (reCAPTCHA) il testo sul badge Google.
 - `From` deriva dalla configurazione SMTP.
 - `Reply-To` usa l'email validata del mittente.
 - La risposta AJAX gestisce successo ed errore.
