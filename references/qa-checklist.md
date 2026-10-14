@@ -74,6 +74,7 @@ Verifica soprattutto:
 - Tutti gli anchor del menu puntano a ID esistenti.
 - Nessun link `#` residuo salvo placeholder dichiarati.
 - Il footer contiene sia il link **Privacy Policy** sia il link **Cookie Policy**.
+- In `config.php`, `legal.privacy_policy` e `legal.cookie_policy` contengono il tag `<a>` completo e il footer li stampa senza escape.
 - Gli URL di Privacy Policy e Cookie Policy sono reali oppure usano placeholder chiaramente segnalati.
 - Link esterni `_blank` con `rel="noopener"`.
 

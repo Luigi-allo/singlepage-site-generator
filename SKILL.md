@@ -172,7 +172,7 @@ Prima di generare i file stabilisci:
 
 Non aggiungere sezioni decorative prive di contenuto reale solo per riempire la pagina.
 
-**Footer obbligatorio:** inserisci sempre nel footer due link distinti e visibili, **Privacy Policy** e **Cookie Policy**. Usa gli URL reali se forniti dall'utente; altrimenti usa rispettivamente `href="#privacy-policy"` e `href="#cookie-policy"` come placeholder temporanei e segnalali chiaramente nella consegna. Non inventare né generare automaticamente i testi legali delle informative.
+**Footer obbligatorio:** inserisci sempre nel footer due link distinti e visibili, **Privacy Policy** e **Cookie Policy**. Usa gli URL reali se forniti dall'utente; altrimenti usa rispettivamente `href="#privacy-policy"` e `href="#cookie-policy"` come placeholder temporanei e segnalali chiaramente nella consegna. I link vivono in `config.php` (sezione `legal`) come tag `<a>` completi e il footer li stampa da lì (vedi “Configurazione centralizzata”). Non inventare né generare automaticamente i testi legali delle informative.
 
 ### 5. Genera il progetto
 
@@ -285,6 +285,11 @@ return [
         'from_email' => '',
         'from_name'  => '',
     ],
+    'legal' => [
+        // Tag <a> completo (non solo l'URL), pronto da stampare nel footer.
+        'privacy_policy' => '<a href="#privacy-policy">Privacy Policy</a>',
+        'cookie_policy'  => '<a href="#cookie-policy">Cookie Policy</a>',
+    ],
     'anti_bot' => [
         'provider'   => 'none', // 'recaptcha' | 'turnstile' | 'none'
         'site_key'   => '',
@@ -305,6 +310,8 @@ Uso previsto:
 define('SITE_CONFIG', true);
 $config = include __DIR__ . '/config/config.php';
 ```
+
+I campi `legal.privacy_policy` e `legal.cookie_policy` contengono l'**intero tag `<a>`** (con `href`, testo ed eventuali `target`/`rel`/`class`), non solo l'URL. `index.php` li stampa nel footer senza `htmlspecialchars()` (es. `<?= $config['legal']['privacy_policy'] ?>`), perché il valore è HTML scritto dal gestore del sito in `config.php`, mai input utente. Se l'utente fornisce solo gli URL, costruisci tu il tag completo. Per link esterni aggiungi `target="_blank" rel="noopener"`.
 
 `index.php` usa i dati per meta, script, contatti e contenuti configurabili. `form-handler.php` usa lo stesso file per SMTP e anti-bot. Non duplicare questi valori altrove.
 
